@@ -1,9 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <string.h>
-#include <time.h>
-#include <sys/wait.h>
 
 #include "types.h"
 #include "catalog.h"
@@ -48,6 +45,9 @@ int main()
   int successful_orders = 0;
   float total_revenue = 0;
 
+  int failed_customers[NUM_PRODUCTS][NUM_CUSTOMERS] = {};
+  int failed_customers_count[NUM_PRODUCTS] = {0};
+
   // Process orders until all customers finish
   while (orders_processed < NUM_CUSTOMERS * ORDERS_PER_CUSTOMER)
   {
@@ -70,6 +70,11 @@ int main()
           response.success = 1;
           response.price = catalog[product_id].price;
         }
+        else
+        {
+          failed_customers[product_id][failed_customers_count[product_id]] = i;
+          failed_customers_count[product_id]++;
+        }
 
         write(response_pipes[i][1], &response, sizeof(order_response_t));
         orders_processed++;
@@ -89,6 +94,15 @@ int main()
     printf("  Description: %s\n", catalog[i].description);
     printf("  Order requests: %d\n", catalog[i].order_requests);
     printf("  Items sold: %d\n", catalog[i].items_sold);
+    if (failed_customers_count[i] > 0)
+    {
+      printf("  Failed customers: ");
+      for (int j = 0; j < failed_customers_count[i]; j++)
+      {
+        printf("%d ", failed_customers[i][j] + 1);
+      }
+      printf("\n");
+    }
     printf("\n");
   }
 

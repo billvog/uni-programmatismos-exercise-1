@@ -1,12 +1,18 @@
-SRC = src/main.c
+CC = gcc
+CFLAGS = -Wall -Wextra
 
-all: main
+SRCS = src/main.c src/catalog.c src/customer.c
+OBJS = $(patsubst src/%.c,bin/%.o,$(SRCS))
+TARGET = bin/main
+
+$(TARGET): $(OBJS)
+	$(CC) $(OBJS) -o $(TARGET)
+
+bin/%.o: src/%.c bin
+	$(CC) $(CFLAGS) -c $< -o $@
 
 bin:
 	mkdir bin
-
-main: $(SRC) bin
-	gcc -o bin/main $(SRC)
 
 clean:
 	rm -rf bin
